@@ -17,7 +17,6 @@ import java.util.jar.JarFile;
 public class ClassUtils {
 
 	/**
-	 * 根据包名获取包下所有类 不递归
 	 * 
 	 * @param packagetName
 	 * @return

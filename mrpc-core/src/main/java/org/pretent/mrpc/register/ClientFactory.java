@@ -18,13 +18,13 @@ public class ClientFactory {
 				: ResourcesFactory.getString(ServerConfig.KEY_STRING_REGISTER);
 	}
 
-	public Object getClient(ProtocolType type) throws Exception {
-		switch(type){
+	public Object getClient(ProtocolType protocol) throws Exception {
+		switch(protocol){
 			case ZOOKEEPER:{
 				return new ZkClient(getAddress(address));
 			}
 			case REDIS:{
-				return new Jedis(getHost(address), getPort(address));
+				return new Jedis(getHost(getAddress(address)), getPort(getAddress(address)));
 			}
 			case MULTICAST:{
 				throw new Exception("not implementats");
@@ -36,6 +36,11 @@ public class ClientFactory {
 		}
 	}
 
+	/**
+	 * return ip:prot
+	 * @param address
+	 * @return
+	 */
 	private String getAddress(String address) {
 		return address.substring(address.lastIndexOf("/") + 1);
 	}
@@ -48,12 +53,18 @@ public class ClientFactory {
 		this.address = address;
 	}
 
+	/**
+	 * 
+	 * @param address
+	 * @return
+	 */
 	public String getHost(String address){
-		return address.substring(address.lastIndexOf("/") + 1,address.indexOf(":"));
+		return address.split(":")[0];
 	}
-	public  int getPort(String address){
-		String port=address.substring(address.lastIndexOf("/") + 1,address.indexOf(":"));
-		port=port.length()>2?port:"6379";
+	
+	public int getPort(String address){
+		String ports[] = address.split(":");
+		String port= ports.length == 2 ? ports[1] : "2181";
 		return  Integer.parseInt(port);
 	}
 }

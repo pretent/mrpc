@@ -2,7 +2,7 @@
 mrpc 是一个java语言分布式服务框架,旨在快速开发高可用的分布式服务/消费
 # mrpc 目前特性
 * 简单高效的rpc调用实现
-* 服务动态注册和发现，使用zookeeper
+* 服务动态注册和发现，支持zookeeper、redis
 * 服务负载均衡（随机调用）
 * 服务调用超时重连
 * 服务不可用重试其他服务提供者
@@ -32,15 +32,15 @@ maven clean install
 
 ## 添加maven 依赖
 ```
-<dependencies>
+<dependency>
 	<groupId>org.pretent.open</groupId>
-	<artifactId>mrpc</artifactId>
-	<version>1.0-SNAPSHOT</version>
-</dependencies>
+	<artifactId>mrpc-core</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+</dependency>
 ```
 
-## 安装zookeeper
-需要本地安装zookeeper，服务注册和发现默认使用127.0.0.1:2181
+## 注册中心
+需要本地安装zookeeper或者redis，服务注册和发现默认使用zookeeper 127.0.0.1:2181
 
 ## 服务注册
 #### 定义接口
@@ -65,17 +65,18 @@ public static void main(String[] args) throws Exception {
 ### 使用MRPCFactory.getInstance()取得服务代理
 ```
 public static void main(String[] args) throws Exception {
-	UserService service = MRPCFactory.getProxy(UserService.class);
+	UserService service = ProxyFactory.getService(UserService.class);
 	System.out.println("-->" + user.say("test"));
 }
 ```
 ## 配置
 
-需要添加/resources/mrpc.properties
+需要添加/mrpc.properties
 
-### 配置服务注册和发现中心（暂时支持zookeeper）
+### 配置服务注册和发现中心（暂时支持zookeeper和redis）
 ```
-register=zookeeper://127.0.0.1:2181
+register=zookeeper://127.0.0.1:2181 或者
+register=redis://127.0.0.1:6379
 ```
 
 ### 配置调用服务超时时间(毫秒单位)
@@ -94,12 +95,14 @@ prot=51000
 
 # 更新日志
 
+* 2016年12月09日13:59:01 新增支持redis注册中心
 * 2016年12月08日15:56:08 支持根据包扫描发布服务
 * 2016年12月08日12:50:56 新增架构图
 * 2016年12月08日00:20:16 服务提供和消费支持MINA,默认为MINA
 * 2016年12月06日14:12:33 新增支持zookeeper注册中心
 
 
+感谢宁儿的大力支持和无私奉献
 欢迎共同进步
 
 E-Mail:353115817@qq.com

@@ -3,7 +3,6 @@ package org.pretent.mrpc.proxy;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
@@ -18,10 +17,14 @@ import org.pretent.mrpc.message.ObjectMessage;
 import org.pretent.mrpc.message.request.HeaderMessage;
 import org.pretent.mrpc.provider.Service;
 import org.pretent.mrpc.provider.ServiceFactory;
+import org.pretent.mrpc.register.ProtocolType;
+import org.pretent.mrpc.register.redis.RedisServiceFactory;
+import org.pretent.mrpc.register.zk.ZkServiceFactory;
+import org.pretent.mrpc.util.ProtocolUtils;
 import org.pretent.mrpc.util.ResourcesFactory;
 
 /**
- * @author Administrator
+ * @author pretent
  */
 public class MinaInvocationHandler<T> implements InvocationHandler {
 
@@ -31,42 +34,84 @@ public class MinaInvocationHandler<T> implements InvocationHandler {
 
 	private NioSocketConnector connector;
 
+	private IoSession session;
+
 	private ServiceFactory serviceFactory;
 
-	public MinaInvocationHandler(Class<T> clazz, ServiceFactory serviceFactory) {
+	private int timeout;
+
+	public MinaInvocationHandler(Class<T> clazz) throws Exception {
 		this.clazz = clazz;
-		this.serviceFactory = serviceFactory;
+		serviceFactory = getServiceFactory();
+		init();
 	}
 
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		return call(method, args);
+		Object object = null;
+		try {
+			object = call(method, args);
+			if (session != null) {
+				session.getService().dispose();
+			}
+		} catch (Exception e) {
+			if (session != null) {
+				session.getService().dispose();
+			}
+			throw e;
+		}
+		return object;
+	}
+
+	private void init() throws Exception {
+		connector = new NioSocketConnector();
+		this.timeout = ResourcesFactory.getInt(ServerConfig.KEY_STRING_CONSUMER_TIMEOUT) == null ? 1500
+				: ResourcesFactory.getInt(ServerConfig.KEY_STRING_CONSUMER_TIMEOUT);
+		DefaultIoFilterChainBuilder chain = connector.getFilterChain();
+		connector.setConnectTimeoutMillis(timeout);
+		chain.addLast("codec", new ProtocolCodecFilter(new ObjectSerializationCodecFactory()));
+		SocketSessionConfig cfg = connector.getSessionConfig();
+		cfg.setUseReadOperation(true);
 	}
 
 	private Object call(Method method, Object[] args) throws Exception {
-		connector = new NioSocketConnector();
-		DefaultIoFilterChainBuilder chain = connector.getFilterChain();
-		chain.addLast("codec", new ProtocolCodecFilter(new ObjectSerializationCodecFactory()));
-		connector.setConnectTimeoutMillis(ResourcesFactory.getInt(ServerConfig.KEY_STRING_CONSUMER_TIMEOUT) == null
-				? 1500 : ResourcesFactory.getInt(ServerConfig.KEY_STRING_CONSUMER_TIMEOUT));
-		SocketSessionConfig cfg = connector.getSessionConfig();
-		cfg.setUseReadOperation(true);
-		// 获取服务
+		init();
 		Service provider = serviceFactory.getService(clazz.getName());
 		LOGGER.debug("connection to " + provider.getIp() + ":" + provider.getPort() + "/" + clazz.getName());
 		InetSocketAddress point = new InetSocketAddress(provider.getIp(), provider.getPort());
-		IoSession session = connector.connect(point).awaitUninterruptibly().getSession();
+		connector.setDefaultRemoteAddress(point);
+		// connectFuture = connector.connect(point).awaitUninterruptibly();
+		session = connector.connect().awaitUninterruptibly().getSession();
 		HeaderMessage request = new HeaderMessage(clazz.getName(), method.getName(), args);
 		session.write(request);
 		ReadFuture readFuture = session.read();
-		if (readFuture.awaitUninterruptibly(ResourcesFactory.getInt(ServerConfig.KEY_STRING_CONSUMER_TIMEOUT) == null
-				? 1500 : ResourcesFactory.getInt(ServerConfig.KEY_STRING_CONSUMER_TIMEOUT), TimeUnit.MILLISECONDS)) {
-			session.getService().dispose();
-			connector.dispose();
+		if (readFuture.awaitUninterruptibly(timeout)) {
+			session.close(true);
 			return ((ObjectMessage) readFuture.getMessage()).getContent();
 		} else {
-			session.getService().dispose();
-			connector.dispose();
+			session.close(true);
 			throw new Exception("read timeout.");
+		}
+	}
+
+	public ServiceFactory getServiceFactory() throws Exception {
+		if (serviceFactory != null) {
+			return serviceFactory;
+		}
+		ProtocolType protocol = ProtocolUtils.getProtocol();
+		LOGGER.info("protocol : " + protocol.name());
+		switch (protocol) {
+		case ZOOKEEPER: {
+			return new ZkServiceFactory();
+		}
+		case REDIS: {
+			return new RedisServiceFactory();
+		}
+		case MULTICAST: {
+			throw new Exception("not implementats");
+		}
+		default: {
+			return new ZkServiceFactory();
+		}
 		}
 	}
 }

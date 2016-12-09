@@ -8,7 +8,7 @@ import org.pretent.mrpc.register.Register;
 public interface Provider {
 
 	/**
-	 * 所有发布的对象
+	 * all published object
 	 */
 	Map<String, Object> ALL_OBJECT = new HashMap<String, Object>();
 

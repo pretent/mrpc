@@ -5,7 +5,7 @@ import java.util.Set;
 import org.pretent.mrpc.provider.Service;
 
 /**
- * 服务注册
+ * service Register
  * 
  * @author pretent
  *

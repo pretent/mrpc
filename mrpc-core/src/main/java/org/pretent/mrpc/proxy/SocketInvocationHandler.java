@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
 import org.apache.log4j.Logger;
@@ -19,6 +20,10 @@ import org.pretent.mrpc.message.ObjectMessage;
 import org.pretent.mrpc.message.request.HeaderMessage;
 import org.pretent.mrpc.provider.Service;
 import org.pretent.mrpc.provider.ServiceFactory;
+import org.pretent.mrpc.register.ProtocolType;
+import org.pretent.mrpc.register.redis.RedisServiceFactory;
+import org.pretent.mrpc.register.zk.ZkServiceFactory;
+import org.pretent.mrpc.util.ProtocolUtils;
 import org.pretent.mrpc.util.ResourcesFactory;
 
 /**
@@ -34,9 +39,23 @@ public class SocketInvocationHandler<T> implements InvocationHandler {
 
 	private ServiceFactory serviceFactory;
 
-	public SocketInvocationHandler(Class<T> clazz, ServiceFactory serviceFactory) {
-		this.serviceFactory = serviceFactory;
+	private int timeout;
+
+	public SocketInvocationHandler(Class<T> clazz) throws Exception {
 		this.clazz = clazz;
+		init();
+	}
+
+	private void init() throws Exception {
+		timeout = ResourcesFactory.getInt(ServerConfig.KEY_STRING_CONSUMER_TIMEOUT) == null ? 1500
+				: ResourcesFactory.getInt(ServerConfig.KEY_STRING_CONSUMER_TIMEOUT);
+		socket = new Socket();
+		try {
+			socket.setSoTimeout(timeout);
+		} catch (SocketException e) {
+			LOGGER.error(e.getStackTrace());
+		}
+		serviceFactory = getServiceFactory();
 	}
 
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -44,17 +63,15 @@ public class SocketInvocationHandler<T> implements InvocationHandler {
 	}
 
 	private Object call(Method method, Object[] args) throws Exception {
-		this.socket = new Socket();
-		socket.setSoTimeout(ResourcesFactory.getInt(ServerConfig.KEY_STRING_CONSUMER_TIMEOUT) == null ? 1500
-				: ResourcesFactory.getInt(ServerConfig.KEY_STRING_CONSUMER_TIMEOUT));
-		// 获取服务
 		Service provider = serviceFactory.getService(clazz.getName());
 		LOGGER.debug("connection to " + provider.getIp() + ":" + provider.getPort() + "/" + clazz.getName());
 		InetSocketAddress point = new InetSocketAddress(provider.getIp(), provider.getPort());
+		if (socket.isConnected()) {
+			socket.close();
+		}
 		try {
 			socket.connect(point);
 		} catch (IOException e) {
-			// 重连第二次
 			LOGGER.debug("connect fail try again");
 			socket.connect(point);
 		}
@@ -63,11 +80,8 @@ public class SocketInvocationHandler<T> implements InvocationHandler {
 		Object retval = null;
 		try {
 			retval = readObject(socket.getInputStream());
-		} catch (SocketTimeoutException e)
-
-		{
+		} catch (SocketTimeoutException e) {
 			LOGGER.debug("read data timeout ,try again");
-			// 重读第二次
 			try {
 				retval = readObject(socket.getInputStream());
 			} catch (SocketTimeoutException e1) {
@@ -99,6 +113,28 @@ public class SocketInvocationHandler<T> implements InvocationHandler {
 		ObjectOutputStream oos = new ObjectOutputStream(out);
 		oos.reset();
 		oos.writeObject(obj);
+	}
+
+	public ServiceFactory getServiceFactory() throws Exception {
+		if (serviceFactory != null) {
+			return serviceFactory;
+		}
+		ProtocolType protocol = ProtocolUtils.getProtocol();
+		LOGGER.info("protocol : "+protocol.name());
+		switch (protocol) {
+			case ZOOKEEPER: {
+				return new ZkServiceFactory();
+			}
+			case REDIS: {
+				return new RedisServiceFactory();
+			}
+			case MULTICAST: {
+				throw new Exception("not implementats");
+			}
+			default: {
+				return new ZkServiceFactory();
+			}
+		}
 	}
 
 }

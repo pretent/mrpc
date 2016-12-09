@@ -1,19 +1,18 @@
 package org.pretent.mrpc.register.redis;
 
+import java.util.List;
+import java.util.Random;
+
 import org.apache.log4j.Logger;
 import org.pretent.mrpc.provider.Service;
 import org.pretent.mrpc.provider.ServiceFactory;
 import org.pretent.mrpc.register.ClientFactory;
 import org.pretent.mrpc.register.ProtocolType;
+
 import redis.clients.jedis.Jedis;
-
-import java.util.List;
-
-import java.util.Random;
 
 /**
  * 
- * 从redis注册中心获取服务
  * 
  * @author pretent
  *
@@ -27,7 +26,7 @@ public class RedisServiceFactory implements ServiceFactory {
 		if (!jedis.exists(RedisKey.REDIS_MAIN_KEY + "::" + serviceName)) {
 			throw new Exception("service is not available.");
 		}
-		List<String> list = jedis.lrange(RedisKey.REDIS_MAIN_KEY + "::" + serviceName, 0, -1);// 获取该key下所有服务
+		List<String> list = jedis.lrange(RedisKey.REDIS_MAIN_KEY + "::" + serviceName, 0, -1);
 		if (list == null) {
 			throw new Exception("service is not available.");
 		}
@@ -36,7 +35,6 @@ public class RedisServiceFactory implements ServiceFactory {
 		if (list.size() == 1) {
 			serviceInfo = list.get(0);
 		}
-		// 随机调用可用服务
 		LOGGER.debug("service is more than one,return random.");
 		serviceInfo = list.get(new Random().nextInt(list.size()));
 		// org.pretent.service.UserService::host::port

@@ -29,11 +29,11 @@ public class SocketWorker implements Runnable {
 			if (recieve instanceof HeaderMessage) {
 				HeaderMessage message = (HeaderMessage) recieve;
 				if (!Provider.ALL_OBJECT.containsKey(message.getClassName())) {
-					throw new Exception("该对象未发布.");
+					throw new Exception("service is not available.");
 				}
 				Class clazz = Class.forName(message.getClassName());
 				if (!clazz.isInterface()) {
-					throw new Exception("非接口.");
+					throw new Exception("not a interface.");
 				}
 				Class[] parameterTypes = null;
 				if (message.getArguments() != null && message.getArguments().length > 0) {
@@ -51,7 +51,7 @@ public class SocketWorker implements Runnable {
 				retMessage.setContent(retval);
 				writeObject(out, retMessage);
 			} else {
-				throw new Exception("协议错误");
+				throw new Exception("protocol error");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -1,7 +1,7 @@
 package org.pretent.mrpc.provider;
 
 public interface ServiceFactory {
-
+	
 	/**
 	 * 获取服务
 	 *

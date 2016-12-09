@@ -12,8 +12,6 @@ import org.pretent.mrpc.register.ProtocolType;
 
 /**
  * 
- * 从zk上获取服务
- * 
  * @author pretent
  *
  */
@@ -22,13 +20,12 @@ public class ZkServiceFactory implements ServiceFactory {
 	private static final Logger LOGGER = Logger.getLogger(ZkServiceFactory.class);
 
 	/**
-	 * 获取zk上的服务
 	 *
 	 * @return
 	 * @throws Exception
 	 */
 	public Service getService(String serviceName) throws Exception {
-		ZkClient zkClient = (ZkClient) new ClientFactory().getClient(ProtocolType.DEFAULT);
+		ZkClient zkClient = (ZkClient) new ClientFactory().getClient(ProtocolType.ZOOKEEPER);
 		if (!zkClient.exists(ZkPath.ZK_MAIN_PATH + "/" + serviceName)) {
 			throw new Exception("service is not available.");
 		}
@@ -41,7 +38,6 @@ public class ZkServiceFactory implements ServiceFactory {
 		if (list.size() == 1) {
 			return list.get(0);
 		}
-		// 随机调用可用服务
 		LOGGER.debug("service is more than one,return random.");
 		return list.get(new Random().nextInt(list.size()));
 	}

@@ -13,7 +13,6 @@ import org.pretent.mrpc.register.ProtocolType;
 import org.pretent.mrpc.register.Register;
 
 /**
- * zookeeper 服务注册
  * 
  * @author pretent
  *
@@ -48,9 +47,6 @@ public class ZkRegister implements Register {
 		}
 	}
 
-	/**
-	 * 检查是否存在根节点
-	 */
 	private void preRegister() {
 		if (!zkclient.exists(ZkPath.ZK_MAIN_PATH)) {
 			zkclient.createPersistent(ZkPath.ZK_MAIN_PATH);

@@ -2,9 +2,6 @@ package org.pretent.mrpc.provider;
 
 import java.io.Serializable;
 
-/**
- * 表示提供服务对象
- */
 public class Service implements Serializable {
 
 	/**

@@ -1,22 +1,15 @@
 package org.pretent.mrpc.register;
 
-import org.pretent.mrpc.ServerConfig;
+import org.pretent.mrpc.register.redis.RedisRegister;
 import org.pretent.mrpc.register.zk.ZkRegister;
-import org.pretent.mrpc.util.ResourcesFactory;
+import org.pretent.mrpc.util.ProtocolUtils;
 
 public class RegisterFactory {
 
 	private ProtocolType protocol;
 
 	public RegisterFactory() {
-		String ptl = ResourcesFactory.getString(ServerConfig.KEY_STRING_PROTOCOL);
-		if (ptl == null) {
-			String address = ResourcesFactory.getString(ServerConfig.KEY_STRING_REGISTER) == null
-					? "zookeeper://127.0.0.1:2181" : ResourcesFactory.getString(ServerConfig.KEY_STRING_REGISTER);
-			protocol = ProtocolType.valueOf(address.substring(0, address.indexOf(":")).toUpperCase());
-		} else {
-			protocol = ProtocolType.valueOf(ResourcesFactory.getString(ServerConfig.KEY_STRING_PROTOCOL).toUpperCase());
-		}
+		protocol = ProtocolUtils.getProtocol();
 	}
 
 	public Register getRegister() throws Exception {
@@ -24,10 +17,20 @@ public class RegisterFactory {
 	}
 
 	public Register getRegister(ProtocolType protocol) throws Exception {
-		if (protocol == ProtocolType.DEFAULT || protocol == ProtocolType.ZOOKEEPER) {
-			return new ZkRegister();
+		switch(protocol){
+			case ZOOKEEPER:{
+				return new ZkRegister();
+			}
+			case REDIS:{
+				return new RedisRegister();
+			}
+			case MULTICAST:{
+				throw new Exception("not implementats");
+			}
+			default:{
+				return new ZkRegister();
+			}
 		}
-		throw new Exception("not implementats");
 	}
 
 	public ProtocolType getProtocol() {
