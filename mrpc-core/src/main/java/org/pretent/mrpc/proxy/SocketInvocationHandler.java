@@ -16,10 +16,10 @@ import org.apache.log4j.Logger;
 import org.pretent.mrpc.ServerConfig;
 import org.pretent.mrpc.message.Message;
 import org.pretent.mrpc.message.ObjectMessage;
+import org.pretent.mrpc.message.request.HeaderMessage;
 import org.pretent.mrpc.provider.Service;
 import org.pretent.mrpc.provider.ServiceFactory;
 import org.pretent.mrpc.util.ResourcesFactory;
-import org.pretent.rpc.message.request.HeaderMessage;
 
 /**
  * @author pretent

@@ -7,7 +7,7 @@ import org.apache.mina.core.session.IoSession;
 import org.pretent.mrpc.Provider;
 import org.pretent.mrpc.message.Message;
 import org.pretent.mrpc.message.ObjectMessage;
-import org.pretent.rpc.message.request.HeaderMessage;
+import org.pretent.mrpc.message.request.HeaderMessage;
 
 public class MinaWorker {
 

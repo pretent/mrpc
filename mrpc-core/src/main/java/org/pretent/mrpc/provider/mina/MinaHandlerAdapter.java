@@ -3,7 +3,7 @@ package org.pretent.mrpc.provider.mina;
 import org.apache.log4j.Logger;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
-import org.pretent.rpc.message.request.HeaderMessage;
+import org.pretent.mrpc.message.request.HeaderMessage;
 
 /**
  * date: 16/12/7 22:35 author: PRETENT

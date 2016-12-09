@@ -1,6 +1,7 @@
 package org.pretent.mrpc.register;
 
 import org.pretent.mrpc.ServerConfig;
+import org.pretent.mrpc.register.zk.ZkRegister;
 import org.pretent.mrpc.util.ResourcesFactory;
 
 public class RegisterFactory {

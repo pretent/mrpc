@@ -10,7 +10,7 @@ import java.net.Socket;
 
 import org.pretent.mrpc.Provider;
 import org.pretent.mrpc.message.ObjectMessage;
-import org.pretent.rpc.message.request.HeaderMessage;
+import org.pretent.mrpc.message.request.HeaderMessage;
 
 public class SocketWorker implements Runnable {
 

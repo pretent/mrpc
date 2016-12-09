@@ -32,21 +32,18 @@ public class ZkServiceFactory implements ServiceFactory {
 		if (!zkClient.exists(ZkPath.ZK_MAIN_PATH + "/" + serviceName)) {
 			throw new Exception("service is not available.");
 		}
-		if (zkClient.exists(ZkPath.ZK_MAIN_PATH + "/" + serviceName)) {
-			Object data = zkClient.readData(ZkPath.ZK_MAIN_PATH + "/" + serviceName);
-			List<Service> list = (List<Service>) data;
-			if (list == null) {
-				throw new Exception("service is not available.");
-			}
-			LOGGER.debug("service is only one return it.");
-			if (list.size() == 1) {
-				return list.get(0);
-			}
-			// 随机调用可用服务
-			LOGGER.debug("service is more than one,return random.");
-			return list.get(new Random().nextInt(list.size()));
+		Object data = zkClient.readData(ZkPath.ZK_MAIN_PATH + "/" + serviceName);
+		List<Service> list = (List<Service>) data;
+		if (list == null) {
+			throw new Exception("service is not available.");
 		}
-		return null;
+		LOGGER.debug("service is only one return it.");
+		if (list.size() == 1) {
+			return list.get(0);
+		}
+		// 随机调用可用服务
+		LOGGER.debug("service is more than one,return random.");
+		return list.get(new Random().nextInt(list.size()));
 	}
 
 }

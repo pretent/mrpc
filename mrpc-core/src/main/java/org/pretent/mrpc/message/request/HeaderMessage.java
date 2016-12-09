@@ -1,4 +1,4 @@
-package org.pretent.rpc.message.request;
+package org.pretent.mrpc.message.request;
 
 import org.pretent.mrpc.message.Message;
 import org.pretent.mrpc.message.MessageType;

@@ -3,6 +3,7 @@ package org.pretent.mrpc.register;
 import org.I0Itec.zkclient.ZkClient;
 import org.pretent.mrpc.ServerConfig;
 import org.pretent.mrpc.util.ResourcesFactory;
+import redis.clients.jedis.Jedis;
 
 public class ClientFactory {
 
@@ -18,10 +19,21 @@ public class ClientFactory {
 	}
 
 	public Object getClient(ProtocolType type) throws Exception {
-		if (type == ProtocolType.DEFAULT || type == ProtocolType.ZOOKEEPER) {
-			return new ZkClient(getAddress(address));
+		switch(type){
+			case ZOOKEEPER:{
+				return new ZkClient(getAddress(address));
+			}
+			case REDIS:{
+				return new Jedis(getHost(address), getPort(address));
+			}
+			case MULTICAST:{
+				throw new Exception("not implementats");
+			}
+			default:{
+				return new ZkClient(getAddress(address));
+			}
+	
 		}
-		throw new Exception("not implementats");
 	}
 
 	private String getAddress(String address) {
@@ -34,5 +46,14 @@ public class ClientFactory {
 
 	public void setAddress(String address) {
 		this.address = address;
+	}
+
+	public String getHost(String address){
+		return address.substring(address.lastIndexOf("/") + 1,address.indexOf(":"));
+	}
+	public  int getPort(String address){
+		String port=address.substring(address.lastIndexOf("/") + 1,address.indexOf(":"));
+		port=port.length()>2?port:"6379";
+		return  Integer.parseInt(port);
 	}
 }
