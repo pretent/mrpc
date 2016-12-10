@@ -32,7 +32,7 @@ public interface Provider {
 	 * @param object
 	 * @throws Exception
 	 */
-	void publish(Object object) throws Exception;
+	void export(Object object) throws Exception;
 
 	/**
 	 * 根据包名注册发布单个对象
@@ -40,6 +40,6 @@ public interface Provider {
 	 * @param packageName
 	 * @throws Exception
 	 */
-	void publish(String packageName) throws Exception;
+	void export(String packageName) throws Exception;
 
 }

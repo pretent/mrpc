@@ -48,7 +48,7 @@ public class MinaProvider implements Provider {
 				: ResourcesFactory.getInt(ServerConfig.KEY_INT_PORT));
 	}
 
-	public void publish(Object object) throws Exception {
+	public void export(Object object) throws Exception {
 		LOGGER.info("-----------------publish starting");
 		String interfaceName = object.getClass().getInterfaces()[0].getName();
 		ALL_OBJECT.put(interfaceName, object);
@@ -58,7 +58,7 @@ public class MinaProvider implements Provider {
 	/**
 	 * 根据包名扫描
 	 */
-	public void publish(String packageName) throws Exception {
+	public void export(String packageName) throws Exception {
 		LOGGER.info("-----------------publish starting");
 		if (packageName == null) {
 			throw new NullPointerException("packageName is null");
@@ -68,7 +68,7 @@ public class MinaProvider implements Provider {
 		Set<Service> servicees = new HashSet<Service>();
 		while (iter.hasNext()) {
 			Class<?> clazz = iter.next();
-			if (!clazz.isInterface()) {
+			if (!clazz.isInterface() && clazz.getAnnotation(org.pretent.mrpc.annotaion.Service.class) != null) {
 				servicees.add(new Service(clazz.getInterfaces()[0].getName(), IPHelper.getIp(host), port));
 				ALL_OBJECT.put(clazz.getInterfaces()[0].getName(), clazz.newInstance());
 			}

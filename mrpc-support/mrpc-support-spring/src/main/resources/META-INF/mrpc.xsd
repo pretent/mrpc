@@ -4,14 +4,9 @@
 	elementFormDefault="qualified" attributeFormDefault="unqualified">
 	<xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
 	<xsd:import namespace="http://www.springframework.org/schema/beans" />
-	<xsd:import namespace="http://www.springframework.org/schema/tool" />
 	<xsd:element name="annotation">
 		<xsd:complexType>
-			<xsd:complexContent>
-				<xsd:extension base="beans:identifiedType">
-					<xsd:attribute name="package" type="xsd:string" />
-				</xsd:extension>
-			</xsd:complexContent>
+			<xsd:attribute name="package" type="xsd:string" />
 		</xsd:complexType>
 	</xsd:element>
 
@@ -30,10 +25,9 @@
 		<xsd:complexType>
 			<xsd:complexContent>
 				<xsd:extension base="beans:identifiedType">
-					<xsd:attribute name="id" type="xsd:string" />
 					<xsd:attribute name="interface" type="xsd:string" />
 				</xsd:extension>
 			</xsd:complexContent>
 		</xsd:complexType>
 	</xsd:element>
-</xsd:schema>  
+</xsd:schema>

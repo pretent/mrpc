@@ -7,12 +7,11 @@ import java.lang.annotation.Target;
 
 /**
  * 表示引用远程对象接口
- * 
- * @author Administrator
  *
+ * @author Administrator
  */
 
-@Target(ElementType.FIELD)
+@Target(value = {ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Reference {
 }

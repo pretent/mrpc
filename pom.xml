@@ -44,13 +44,23 @@
 			    <groupId>org.springframework</groupId>
 			    <artifactId>spring-beans</artifactId>
 			    <version>${spring.version}</version>
+				<scope>compile</scope>
 			</dependency>
 						
 			<dependency>
 			    <groupId>org.springframework</groupId>
 			    <artifactId>spring-context</artifactId>
 			    <version>${spring.version}</version>
+				<scope>compile</scope>
 			</dependency>
+
+			<dependency>
+				<groupId>org.pretent.open</groupId>
+				<artifactId>mrpc-core</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+				<scope>compile</scope>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 	<modules>

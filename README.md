@@ -55,7 +55,7 @@ public interface UserService extends Remote {
 ```
 public static void main(String[] args) throws Exception {
 		Provider provider = new MinaProvider();
-		provider.publish("server.impl");
+		provider.export("server.impl");
 		provider.start();
 }
 ```

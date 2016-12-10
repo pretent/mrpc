@@ -20,5 +20,11 @@
 			<artifactId>spring-context</artifactId>
 			<scope>compile</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.pretent.open</groupId>
+			<artifactId>mrpc-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 </project>
