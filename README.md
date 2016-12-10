@@ -62,7 +62,7 @@ public static void main(String[] args) throws Exception {
 ### 将服务接口共享给客户端
 消费端需要引入业务接口（UserService）
 ## 消费者服务调用
-### 使用MRPCFactory.getInstance()取得服务代理
+### 使用ProxyFactory.getService()取得服务代理
 ```
 public static void main(String[] args) throws Exception {
 	UserService service = ProxyFactory.getService(UserService.class);
