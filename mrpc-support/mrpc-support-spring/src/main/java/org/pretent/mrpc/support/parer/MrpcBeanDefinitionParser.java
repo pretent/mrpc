@@ -46,14 +46,43 @@ public class MrpcBeanDefinitionParser implements BeanDefinitionParser {
             beanDefinition.setAttribute("address", address);
             beanDefinition.getPropertyValues().add("address", address);
         }
-        if (clazz.equals(ServiceBean.class)) {
+        if (ServiceBean.class.equals(clazz)) {
+            // ServiceBean 本身
             String service = element.getAttribute("interface");
             String ref = element.getAttribute("ref");
             beanDefinition.getPropertyValues().add("interfaceName", service);
             beanDefinition.getPropertyValues().add("ref", ref);
+
+
+            /** **/
+            // 每一个标签都是需要发布一个服务
+            RootBeanDefinition bean = new RootBeanDefinition();
+            try {
+                bean.setBeanClass(Class.forName(service));
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException(e.getMessage());
+            }
+            bean.setLazyInit(false);
+            // parserContext.getRegistry().registerBeanDefinition(service, bean);
+            /** **/
         }
-        if (clazz.equals(ReferenceBean.class)) {
+        if (ReferenceBean.class.equals(clazz)) {
+            String service = element.getAttribute("interface");
+            beanDefinition.getPropertyValues().add("interfaceName", service);
+
+            /** **/
+            // 每一个标签都是需要发布一个服务
+            RootBeanDefinition bean = new RootBeanDefinition();
+            try {
+                bean.setBeanClass(Class.forName(service));
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException(e.getMessage());
+            }
+            bean.setLazyInit(false);
+            // parserContext.getRegistry().registerBeanDefinition(service, bean);
+            /** **/
         }
+
         String id = element.getAttribute("id");
         if ((id == null || id.length() == 0)) {
             String name = element.getAttribute("name");

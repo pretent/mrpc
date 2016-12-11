@@ -26,6 +26,8 @@ public class AnnotationBean
 
     private RegisterBean registerBean;
 
+    private ServiceBean serviceBean;
+
     private ProtocolConfig protocolConfig;
 
     private Provider provider;
@@ -42,6 +44,11 @@ public class AnnotationBean
             System.err.println(e.getMessage());
         }
         try {
+            serviceBean = applicationContext.getBean(ServiceBean.class);
+        } catch (BeansException e) {
+            System.err.println(e.getMessage());
+        }
+        try {
             protocolConfig = applicationContext.getBean(ProtocolConfig.class);
         } catch (BeansException e) {
             System.err.println(e.getMessage());
@@ -52,13 +59,19 @@ public class AnnotationBean
         // bean初始化之后发布服务（annotation配置的包内标有Service注解的bean）
         // 只有配置了bean才会进入,每个bean都会进入
         // 所以的bean加了Service注解都会被发布
+        System.out.println("HHHHHHHHHHHHHHHHHHHHHHHH" + bean.getClass().getName());
         return bean;
     }
 
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        // 所以beandefinition都会进入
-        // bean初始化之前设置标有（reference ）属性或者方法
+        System.out.println("FFFFFFFFFFFFFFFFFFFFFFFF" + bean.getClass().getName());
+        // 只有配置了bean才会进入,每个bean都会进入
+        // 处理bean(reference)初始化之前设置标有（reference ）属性或者方法
         injectBean.inject(bean);
+
+        // 处理reference标签操作
+
+        // 处理service标签操作
 
         // 处理export操作
         if (this.applicationContext != null) {
@@ -70,6 +83,9 @@ public class AnnotationBean
             Service service = bean.getClass().getAnnotation(Service.class);
             if (service != null) {
                 try {
+                    if (serviceBean != null) {
+                        provider = serviceBean.getProvider();
+                    }
                     if (provider == null) {
                         provider = new MinaProvider();
                         if (protocolConfig != null) {

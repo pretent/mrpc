@@ -1,7 +1,6 @@
 package org.pretent.mrpc.support.bean;
 
 import org.pretent.mrpc.Provider;
-import org.pretent.mrpc.annotaion.Service;
 import org.pretent.mrpc.provider.mina.MinaProvider;
 import org.pretent.mrpc.register.ProtocolType;
 import org.pretent.mrpc.register.RegisterFactory;
@@ -14,6 +13,9 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+/**
+ * 服务注册
+ */
 public class ServiceBean
         implements DisposableBean, BeanFactoryPostProcessor, BeanPostProcessor, ApplicationContextAware {
 
@@ -24,6 +26,8 @@ public class ServiceBean
     private ApplicationContext applicationContext;
 
     private Provider provider;
+
+    private AnnotationBean annotationBean;
 
     private RegisterBean registerBean;
 
@@ -56,36 +60,31 @@ public class ServiceBean
     }
 
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        // 处理export操作
-        if (this.applicationContext != null) {
-            AnnotationBean annotationBean = applicationContext.getBean(AnnotationBean.class);
-            Service service = bean.getClass().getAnnotation(Service.class);
-            if (service != null) {
-                try {
-                    if (annotationBean != null) {
-                        provider = annotationBean.getProvider();
-                    }
-                    if (provider == null) {
-                        provider = new MinaProvider();
-                        if (protocolConfig != null) {
-                            provider.setHost(protocolConfig.getHost());
-                            provider.setPort(protocolConfig.getPort());
-                        }
-                        if (registerBean != null) {
-                            provider.setRegister(new RegisterFactory().getRegister(registerBean.getAddress(), ProtocolType.valueOf(registerBean.getAddress().substring(0, registerBean.getAddress().indexOf("/") - 1).toUpperCase())));
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                exportBean.export(provider, bean);
-            }
-        }
         return bean;
     }
 
-    public Object postProcessAfterInitialization(Object o, String s) throws BeansException {
-        return null;
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        // 处理export操作
+        try {
+            if (annotationBean != null) {
+                // 直接让annotation处理
+                return bean;
+            }
+            if (provider == null) {
+                provider = new MinaProvider();
+                if (protocolConfig != null) {
+                    provider.setHost(protocolConfig.getHost());
+                    provider.setPort(protocolConfig.getPort());
+                }
+                if (registerBean != null) {
+                    provider.setRegister(new RegisterFactory().getRegister(registerBean.getAddress(), ProtocolType.valueOf(registerBean.getAddress().substring(0, registerBean.getAddress().indexOf("/") - 1).toUpperCase())));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        exportBean.export(provider, bean);
+        return bean;
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -100,5 +99,18 @@ public class ServiceBean
         } catch (BeansException e) {
             System.err.println(e.getMessage());
         }
+        try {
+            annotationBean = applicationContext.getBean(AnnotationBean.class);
+        } catch (BeansException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public Provider getProvider() {
+        return provider;
+    }
+
+    public void setProvider(Provider provider) {
+        this.provider = provider;
     }
 }
