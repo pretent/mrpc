@@ -1,15 +1,19 @@
-# mrpc
-mrpc 是一个java语言分布式服务框架,旨在快速开发高可用的分布式服务/消费
+# mrpc-support-spring docs
 
 ## 添加maven 依赖
 ```
+<dependency>
+	<groupId>org.pretent.open</groupId>
+	<artifactId>mrpc-core</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+</dependency>
 <dependency>
 	<groupId>org.pretent.open</groupId>
 	<artifactId>mrpc-core-support</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 </dependency>
 ```
-### 服务提供者
+## 服务提供者
 ```
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -22,6 +26,7 @@ mrpc 是一个java语言分布式服务框架,旨在快速开发高可用的分�
 
     <!-- 配置注册中心 -->
     <mrpc:register address="zookeeper://127.0.0.1:2181"/>
+    
     <!-- 此包下发布服务,需要@Service注解-->
     <mrpc:annotation package="org.pretent.server.interfaces.impl"/>
 </beans>
@@ -40,7 +45,7 @@ public class UserServiceImpl implements UserService {
 }
 ```
 
-### 服务消费者
+## 服务消费者
 
 ```
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -54,6 +59,7 @@ public class UserServiceImpl implements UserService {
 
     <!-- 配置注册中心 -->
     <mrpc:register address="zookeeper://127.0.0.1:2181"/>
+    
     <!-- spring bean 配置 ->
     <bean id="orderAction" class="action.UserAction"/>
 </beans>
