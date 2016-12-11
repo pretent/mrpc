@@ -6,39 +6,56 @@ import org.pretent.mrpc.util.ProtocolUtils;
 
 public class RegisterFactory {
 
-	private ProtocolType protocol;
+    private ProtocolType protocol;
 
-	public RegisterFactory() {
-		protocol = ProtocolUtils.getProtocol();
-	}
+    public RegisterFactory() {
+        protocol = ProtocolUtils.getProtocol();
+    }
 
-	public Register getRegister() throws Exception {
-		return getRegister(protocol);
-	}
+    public Register getRegister() throws Exception {
+        return getRegister(protocol);
+    }
 
-	public Register getRegister(ProtocolType protocol) throws Exception {
-		switch(protocol){
-			case ZOOKEEPER:{
-				return new ZkRegister();
-			}
-			case REDIS:{
-				return new RedisRegister();
-			}
-			case MULTICAST:{
-				throw new Exception("not implementats");
-			}
-			default:{
-				return new ZkRegister();
-			}
-		}
-	}
+    public Register getRegister(ProtocolType protocol) throws Exception {
+        switch (protocol) {
+            case ZOOKEEPER: {
+                return new ZkRegister();
+            }
+            case REDIS: {
+                return new RedisRegister();
+            }
+            case MULTICAST: {
+                throw new Exception("not implementats");
+            }
+            default: {
+                return new ZkRegister();
+            }
+        }
+    }
 
-	public ProtocolType getProtocol() {
-		return protocol;
-	}
+    public Register getRegister(String address, ProtocolType protocol) throws Exception {
+        switch (protocol) {
+            case ZOOKEEPER: {
+                return new ZkRegister(address);
+            }
+            case REDIS: {
+                return new RedisRegister(address);
+            }
+            case MULTICAST: {
+                throw new Exception("not implementats");
+            }
+            default: {
+                return new ZkRegister(address);
+            }
+        }
+    }
 
-	public void setProtocol(ProtocolType protocol) {
-		this.protocol = protocol;
-	}
+    public ProtocolType getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(ProtocolType protocol) {
+        this.protocol = protocol;
+    }
 
 }

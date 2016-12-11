@@ -14,6 +14,8 @@ public interface Provider {
 
 	void start() throws Exception;
 
+	void close() ;
+
 	void setRegister(Register register);
 
 	Register getRegister();
@@ -23,6 +25,8 @@ public interface Provider {
 	int getPort();
 
 	void setHost(String host);
+
+	boolean started();
 
 	String getHost();
 

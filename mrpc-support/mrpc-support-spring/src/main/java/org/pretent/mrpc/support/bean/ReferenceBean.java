@@ -1,41 +1,61 @@
 package org.pretent.mrpc.support.bean;
 
+import org.apache.log4j.Logger;
+import org.pretent.mrpc.client.ProxyFactory;
+import org.pretent.mrpc.support.config.ProtocolConfig;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-public class ReferenceBean implements FactoryBean, ApplicationContextAware, InitializingBean, DisposableBean {
+/**
+ *
+ */
+public class ReferenceBean
+        implements BeanFactoryPostProcessor, BeanPostProcessor, ApplicationContextAware {
 
-	public void destroy() throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
+    private static Logger LOGGER = Logger.getLogger(RegisterBean.class);
 
-	public void afterPropertiesSet() throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
+    private ApplicationContext applicationContext;
 
-	public void setApplicationContext(ApplicationContext arg0) throws BeansException {
-		// TODO Auto-generated method stub
-		
-	}
+    private ProtocolConfig protocolConfig;
 
-	public Object getObject() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    private String interfaceName;
 
-	public Class getObjectType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    private InjectBean injectBean = new InjectBean();
 
-	public boolean isSingleton() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    public void setApplicationContext(ApplicationContext context) throws BeansException {
+        applicationContext = context;
+        try {
+            protocolConfig = applicationContext.getBean(ProtocolConfig.class);
+        } catch (BeansException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        // bean初始化之后发布服务（annotation配置的包内标有Service注解的bean）
+        // 只有配置了bean才会进入,每个bean都会进入
+        // 所以的bean加了Service注解都会被发布
+        return bean;
+    }
+
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        // 为配置的接口生成代理对象
+        Object object = null;
+        try {
+            Class<?> clazz = Class.forName(interfaceName);
+            object = ProxyFactory.getService(clazz);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return object;
+    }
+
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory arg0) throws BeansException {
+    }
 }

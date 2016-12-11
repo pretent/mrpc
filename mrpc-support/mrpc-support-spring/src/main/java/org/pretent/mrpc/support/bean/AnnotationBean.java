@@ -1,9 +1,12 @@
 package org.pretent.mrpc.support.bean;
 
 import org.apache.log4j.Logger;
-import org.pretent.mrpc.annotaion.Reference;
+import org.pretent.mrpc.Provider;
 import org.pretent.mrpc.annotaion.Service;
-import org.pretent.mrpc.client.ProxyFactory;
+import org.pretent.mrpc.provider.mina.MinaProvider;
+import org.pretent.mrpc.register.ProtocolType;
+import org.pretent.mrpc.register.RegisterFactory;
+import org.pretent.mrpc.support.config.ProtocolConfig;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -11,10 +14,6 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 public class AnnotationBean
         implements DisposableBean, BeanFactoryPostProcessor, BeanPostProcessor, ApplicationContextAware {
@@ -25,12 +24,43 @@ public class AnnotationBean
 
     private ApplicationContext applicationContext;
 
+    private RegisterBean registerBean;
+
+    private ProtocolConfig protocolConfig;
+
+    private Provider provider;
+
+    private InjectBean injectBean = new InjectBean();
+
+    private ExportBean exportBean = new ExportBean();
+
     public void setApplicationContext(ApplicationContext context) throws BeansException {
-        this.applicationContext = context;
+        applicationContext = context;
+        try {
+            registerBean = applicationContext.getBean(RegisterBean.class);
+        } catch (BeansException e) {
+            System.err.println(e.getMessage());
+        }
+        try {
+            protocolConfig = applicationContext.getBean(ProtocolConfig.class);
+        } catch (BeansException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         // bean初始化之后发布服务（annotation配置的包内标有Service注解的bean）
+        // 只有配置了bean才会进入,每个bean都会进入
+        // 所以的bean加了Service注解都会被发布
+        return bean;
+    }
+
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        // 所以beandefinition都会进入
+        // bean初始化之前设置标有（reference ）属性或者方法
+        injectBean.inject(bean);
+
+        // 处理export操作
         if (this.applicationContext != null) {
             AnnotationBean annotationBean = applicationContext.getBean(AnnotationBean.class);
             this.packageName = annotationBean.packageName;
@@ -39,49 +69,21 @@ public class AnnotationBean
             }
             Service service = bean.getClass().getAnnotation(Service.class);
             if (service != null) {
-                // TODO export bean to register
-                LOGGER.debug("================" + bean.getClass().getName() + "需要发布bena到注册中心");
-            }
-        }
-        return bean;
-    }
-
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        // bean初始化之前设置标有（reference ）属性或者方法
-        Field[] fields = bean.getClass().getDeclaredFields();
-        for (Field field : fields) {
-            if (!field.getType().isPrimitive()) {
-                Reference reference = field.getAnnotation(Reference.class);
-                if (reference != null) {
-                    LOGGER.debug("field================" + bean.getClass().getName() + "--->" + field.getName() + "需要生成reference的代理对象");
-                    try {
-                        Object value = ProxyFactory.getService(field.getType());
-                        if (value != null) {
-                            field.setAccessible(true);
-                            field.set(bean, value);
-                            field.setAccessible(false);
-                        }
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-        Method[] methods = bean.getClass().getMethods();
-        for (Method method : methods) {
-            Reference reference = method.getAnnotation(Reference.class);
-            if (reference != null) {
-                LOGGER.debug("method================" + bean.getClass().getName() + "--->" + method.getName() + "需要生成reference的代理对象");
                 try {
-                    Object value = ProxyFactory.getService(method.getParameterTypes()[0]);
-                    if (value != null) {
-                        method.invoke(bean, value);
+                    if (provider == null) {
+                        provider = new MinaProvider();
+                        if (protocolConfig != null) {
+                            provider.setHost(protocolConfig.getHost());
+                            provider.setPort(protocolConfig.getPort());
+                        }
+                        if (registerBean != null) {
+                            provider.setRegister(new RegisterFactory().getRegister(registerBean.getAddress(), ProtocolType.valueOf(registerBean.getAddress().substring(0, registerBean.getAddress().indexOf("/") - 1).toUpperCase())));
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                exportBean.export(provider, bean);
             }
         }
         return bean;
@@ -108,5 +110,19 @@ public class AnnotationBean
         return false;
     }
 
+    public String getPackageName() {
+        return packageName;
+    }
 
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
+
+    public Provider getProvider() {
+        return provider;
+    }
+
+    public void setProvider(Provider provider) {
+        this.provider = provider;
+    }
 }

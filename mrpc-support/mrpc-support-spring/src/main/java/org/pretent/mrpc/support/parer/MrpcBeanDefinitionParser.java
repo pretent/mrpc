@@ -1,8 +1,11 @@
 package org.pretent.mrpc.support.parer;
 
+import org.apache.log4j.Logger;
 import org.pretent.mrpc.support.bean.AnnotationBean;
 import org.pretent.mrpc.support.bean.ReferenceBean;
+import org.pretent.mrpc.support.bean.RegisterBean;
 import org.pretent.mrpc.support.bean.ServiceBean;
+import org.pretent.mrpc.support.config.ProtocolConfig;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
@@ -11,45 +14,59 @@ import org.w3c.dom.Element;
 
 /**
  * AbstractSingleBeanDefinitionParser
- * 
- * @author pretent
  *
+ * @author pretent
  */
 public class MrpcBeanDefinitionParser implements BeanDefinitionParser {
 
-	private Class<?> clazz;
+    private static Logger LOGGER = Logger.getLogger(AnnotationBean.class);
 
-	public MrpcBeanDefinitionParser(Class<?> clazz) {
-		this.clazz = clazz;
-	}
+    private Class<?> clazz;
 
-	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		RootBeanDefinition beanDefinition = new RootBeanDefinition();
-		beanDefinition.setBeanClass(this.clazz);
-		beanDefinition.setLazyInit(false);
-		if(clazz.equals(AnnotationBean.class)){
-			String packageName = element.getAttribute("package");
-			System.out.println("-========================"+packageName);
-			beanDefinition.setAttribute("packageName",packageName);
-		}
-		String id = element.getAttribute("id");
-		if(clazz.equals(ServiceBean.class)){
-		}
-		if(clazz.equals(ReferenceBean.class)){
+    public MrpcBeanDefinitionParser(Class<?> clazz) {
+        this.clazz = clazz;
+    }
 
-		}
-		if ((id == null || id.length() == 0)) {
-			String generatedBeanName = element.getAttribute("name");
-			if (generatedBeanName == null || generatedBeanName.length() == 0) {
-				generatedBeanName = clazz.getName();
-			}
-			id = generatedBeanName;
-		}
-		parserContext.getRegistry().registerBeanDefinition(id, beanDefinition);
-		return beanDefinition;
-	}
+    public BeanDefinition parse(Element element, ParserContext parserContext) {
+        RootBeanDefinition beanDefinition = new RootBeanDefinition();
+        beanDefinition.setBeanClass(clazz);
+        beanDefinition.setLazyInit(false);
+        if (clazz.equals(AnnotationBean.class)) {
+            String packageName = element.getAttribute("package");
+            beanDefinition.getPropertyValues().add("packageName", packageName);
+        }
+        if (ProtocolConfig.class.equals(clazz)) {
+            String host = element.getAttribute("host");
+            String port = element.getAttribute("port");
+            beanDefinition.getPropertyValues().add("host", host);
+            beanDefinition.getPropertyValues().add("port", Integer.parseInt(port));
+        }
+        if (RegisterBean.class.equals(clazz)) {
+            String address = element.getAttribute("address");
+            beanDefinition.setAttribute("address", address);
+            beanDefinition.getPropertyValues().add("address", address);
+        }
+        if (clazz.equals(ServiceBean.class)) {
+            String service = element.getAttribute("interface");
+            String ref = element.getAttribute("ref");
+            beanDefinition.getPropertyValues().add("interfaceName", service);
+            beanDefinition.getPropertyValues().add("ref", ref);
+        }
+        if (clazz.equals(ReferenceBean.class)) {
+        }
+        String id = element.getAttribute("id");
+        if ((id == null || id.length() == 0)) {
+            String name = element.getAttribute("name");
+            if (name == null || name.length() == 0) {
+                name = clazz.getName();
+            }
+            id = name;
+        }
+        parserContext.getRegistry().registerBeanDefinition(id, beanDefinition);
+        return beanDefinition;
+    }
 
-	public static void main(String[] args) {
-		System.out.println();
-	}
+    public static void main(String[] args) {
+        System.out.println();
+    }
 }

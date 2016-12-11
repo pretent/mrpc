@@ -17,30 +17,50 @@ import java.util.Set;
  * author: PRETENT
  **/
 public class RedisRegister implements Register {
+
     private Jedis jedis;
-    public  RedisRegister()throws Exception {
-        jedis=(Jedis)new ClientFactory().getClient(ProtocolType.REDIS);
+
+    private String address;
+
+    private ClientFactory clientFactory = new ClientFactory();
+
+    public RedisRegister() throws Exception {
+        jedis = (Jedis) clientFactory.getClient(ProtocolType.REDIS);
+    }
+
+    public RedisRegister(String address) throws Exception {
+        clientFactory.setAddress(address);
+        this.address = address;
+        jedis = (Jedis) clientFactory.getClient(ProtocolType.REDIS);
     }
 
     public void register(Service service) throws Exception {
-        List<String> list=null;
-        if (jedis.exists(RedisKey.REDIS_MAIN_KEY+"::"+service.getClassName())) {
-            list = jedis.lrange(RedisKey.REDIS_MAIN_KEY+"::"+service.getClassName(),0,-1);
-        }else {
-            list =new ArrayList<String>();
+        List<String> list = null;
+        if (jedis.exists(RedisKey.REDIS_MAIN_KEY + "::" + service.getClassName())) {
+            list = jedis.lrange(RedisKey.REDIS_MAIN_KEY + "::" + service.getClassName(), 0, -1);
+        } else {
+            list = new ArrayList<String>();
 
         }
-        String serviceInfo=service.getClassName()+"::"+service.getIp()+"::"+service.getPort();
+        String serviceInfo = service.getClassName() + "::" + service.getIp() + "::" + service.getPort();
         list.add(serviceInfo);
-        jedis.lpush(RedisKey.REDIS_MAIN_KEY+"::"+service.getClassName(),serviceInfo);
+        jedis.lpush(RedisKey.REDIS_MAIN_KEY + "::" + service.getClassName(), serviceInfo);
 
     }
 
     public void register(Set<Service> services) throws Exception {
-            Iterator<Service> iter = services.iterator();
-            while (iter.hasNext()) {
-                Service service = iter.next();
-                register(service);
-            }
+        Iterator<Service> iter = services.iterator();
+        while (iter.hasNext()) {
+            Service service = iter.next();
+            register(service);
+        }
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getAddress() {
+        return address;
     }
 }

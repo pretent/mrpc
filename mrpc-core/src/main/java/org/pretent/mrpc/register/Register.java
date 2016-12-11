@@ -15,4 +15,8 @@ public interface Register {
 	void register(Service service) throws Exception;
 
 	void register(Set<Service> services) throws Exception;
+
+	void setAddress(String address);
+
+	String getAddress();
 }

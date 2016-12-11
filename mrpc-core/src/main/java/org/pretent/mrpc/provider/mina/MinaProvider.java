@@ -38,6 +38,8 @@ public class MinaProvider implements Provider {
 
 	private Register register;
 
+	private boolean started = false;
+
 	public MinaProvider() throws Exception {
 		acceptor = new NioSocketAcceptor();
 		register = new RegisterFactory().getRegister();
@@ -81,7 +83,14 @@ public class MinaProvider implements Provider {
 		bind(host, port);
 	}
 
-	private void bind(String host, int port) throws Exception {
+	public synchronized void close() {
+		if(acceptor != null){
+			acceptor.unbind();
+			acceptor.dispose();
+		}
+	}
+
+	private synchronized void bind(String host, int port) throws Exception {
 		SocketAddress endpoint = new InetSocketAddress(host, port);
 		LOGGER.info("published...");
 		LOGGER.info("server started on " + host + ":" + port + "...");
@@ -92,6 +101,7 @@ public class MinaProvider implements Provider {
 		chain.addLast("codec", new ProtocolCodecFilter(objSerialFactory));
 		acceptor.setHandler(new MinaHandlerAdapter());
 		acceptor.bind(endpoint);
+		started = true;
 	}
 
 	public void setRegister(Register register) {
@@ -112,6 +122,10 @@ public class MinaProvider implements Provider {
 
 	public void setHost(String host) {
 		this.host = host;
+	}
+
+	public boolean started() {
+		return started;
 	}
 
 	public String getHost() {

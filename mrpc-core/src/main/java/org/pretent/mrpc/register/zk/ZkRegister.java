@@ -21,8 +21,18 @@ public class ZkRegister implements Register {
 
 	private ZkClient zkclient;
 
+	private String address;
+
+	private ClientFactory clientFactory = new ClientFactory();
+
 	public ZkRegister() throws Exception {
-		zkclient = (ZkClient) new ClientFactory().getClient(ProtocolType.DEFAULT);
+		zkclient = (ZkClient) clientFactory.getClient(ProtocolType.DEFAULT);
+	}
+
+	public ZkRegister(String address) throws Exception {
+		clientFactory.setAddress(address);
+		this.address = address;
+		zkclient = (ZkClient) clientFactory.getClient(ProtocolType.DEFAULT);
 	}
 
 	public void register(Service service) throws Exception {
@@ -45,6 +55,14 @@ public class ZkRegister implements Register {
 			Service service = iter.next();
 			register(service);
 		}
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getAddress() {
+		return address;
 	}
 
 	private void preRegister() {
