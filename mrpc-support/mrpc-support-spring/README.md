@@ -14,6 +14,7 @@
 </dependency>
 ```
 ## 服务提供者
+### 配置注册中心和所要发布服务的包
 ```
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -46,6 +47,7 @@ public class UserServiceImpl implements UserService {
 ```
 
 ## 服务消费者
+### 配置注册中心
 
 ```
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -59,12 +61,9 @@ public class UserServiceImpl implements UserService {
 
     <!-- 配置注册中心 -->
     <mrpc:register address="zookeeper://127.0.0.1:2181"/>
-    
-    <!-- spring bean 配置 ->
-    <bean id="orderAction" class="action.UserAction"/>
 </beans>
 ```
-### 消费者使用
+### 注入服务
 ```
 public class UserAction {
     @Reference
