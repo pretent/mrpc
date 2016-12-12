@@ -61,15 +61,23 @@ public class RegisterBean implements BeanPostProcessor, ApplicationContextAware,
 		System.err.println("00000000000000000000000000:postProcessBeforeInitialization:" + bean.getClass().getName());
 		// 处理annotation
 		injectBean.inject(bean);
-		// TODO 处理reference 标签
+		// export 非service标签
+		if (annotationBean != null) {
+			String packageName = annotationBean.getPackageName();
+			if (bean.getClass().getName().startsWith(packageName) && bean.getClass().getAnnotation(Service.class) != null) {
+				export(bean);
+			}
+		}
 		return bean;
 	}
 
 	/**
+	 * 只export service 标签
 	 * export
 	 */
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		// 将RootBeanDefinition 为Service的指向真是的bean参考
+		System.err.println("11111111111111111111111111111");
 		String[] names = beanFactory.getBeanDefinitionNames();
 		for (String name : names) {
 			if (name.startsWith("mrpc.service:")) {
@@ -77,23 +85,8 @@ public class RegisterBean implements BeanPostProcessor, ApplicationContextAware,
 				String ref = (String) interfacBean.getAttribute("ref");
 				Object refRealBean = beanFactory.getBean(ref);
 				interfacBean.setBeanClass(refRealBean.getClass());
-				LOGGER.debug("bean name :" + name + ",ref-->" + ref);
+				System.err.println("bean name :" + name + ",ref-->" + ref);
 				export(refRealBean);// 导出真实的bean
-			}else{
-				if (annotationBean != null) {
-					String packageName = annotationBean.getPackageName();
-					Object refRealBean = beanFactory.getBean(name);
-					if (refRealBean.getClass().getName().startsWith(packageName)) {
-						export(refRealBean);
-					}
-				}else{
-					/**
-					Object bean = beanFactory.getBean(name);
-					if(bean.getClass().getAnnotation(Service.class) != null){
-						export(bean);
-					}
-					 **/
-				}
 			}
 		}
 	}
