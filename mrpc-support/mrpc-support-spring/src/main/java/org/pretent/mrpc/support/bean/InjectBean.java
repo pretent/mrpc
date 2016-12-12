@@ -8,19 +8,17 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 /**
- * 处理属性和方法上的@Reference注解,为bean注入代理对象
  */
 public class InjectBean {
 
     private static Logger LOGGER = Logger.getLogger(InjectBean.class);
 
-    public void inject(Object bean) {
+    public synchronized void inject(Object bean) {
         Method[] methods = bean.getClass().getMethods();
         for (Method method : methods) {
             Reference reference = method.getAnnotation(Reference.class);
             if (reference != null) {
-                LOGGER.debug("method================" + bean.getClass().getName() + "--->" + method.getName() + "需要生成reference的代理对象");
-                System.err.println("method================" + bean.getClass().getName() + "--->" + method.getName() + "需要生成reference的代理对象");
+                LOGGER.debug("method================" + bean.getClass().getName() + "--->" + method.getName() + "genrate reference proxy");
                 try {
                     Object value = ProxyFactory.getService(method.getParameterTypes()[0]);
                     if (value != null) {
@@ -41,8 +39,7 @@ public class InjectBean {
                         Object value = field.get(bean);
                         field.setAccessible(false);
                         if (value == null) {
-                            LOGGER.debug("field================" + bean.getClass().getName() + "--->" + field.getName() + "需要生成reference的代理对象");
-                            System.err.println("field================" + bean.getClass().getName() + "--->" + field.getName() + "需要生成reference的代理对象");
+                            LOGGER.debug("field================" + bean.getClass().getName() + "--->" + field.getName() + "genrate reference proxy");
                             value = ProxyFactory.getService(field.getType());
                             if (value != null) {
                                 field.setAccessible(true);

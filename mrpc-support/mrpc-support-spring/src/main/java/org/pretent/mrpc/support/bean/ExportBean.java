@@ -11,7 +11,7 @@ public class ExportBean {
 
     private static Logger LOGGER = Logger.getLogger(ExportBean.class);
 
-    public void export(Provider provider, Object bean) {
+    public synchronized void export(Provider provider, Object bean) {
         try {
             System.err.println("0000000000000000000发布bean:" + bean.getClass().getName());
             provider.export(bean);
