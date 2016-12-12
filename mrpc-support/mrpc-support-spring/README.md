@@ -1,8 +1,8 @@
 mrpc-support-spring docs 
 
-# 快速开始
+## 快速开始
 
-## 添加maven 依赖
+### 添加maven 依赖
 ```
 <dependency>
 	<groupId>org.pretent.open</groupId>
@@ -15,8 +15,8 @@ mrpc-support-spring docs
 	<version>0.0.1-SNAPSHOT</version>
 </dependency>
 ```
-## 服务提供者
-### 配置注册中心和所要发布服务的包
+### 服务提供者
+#### 配置注册中心和所要发布服务的包
 ```
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -34,13 +34,13 @@ mrpc-support-spring docs
     <mrpc:annotation package="org.pretent.server.interfaces.impl"/>
 </beans>
 ```
-### 定义接口
+#### 定义接口
 ```
 public interface UserService {
     public Person insert(Person person) throws Exception;
 }
 ```
-### 接口实现
+#### 接口实现
 ```
 @Service
 public class UserServiceImpl implements UserService {
@@ -48,8 +48,8 @@ public class UserServiceImpl implements UserService {
 }
 ```
 
-## 服务消费者
-### 配置注册中心
+### 服务消费者
+#### 配置注册中心
 
 ```
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService {
     <mrpc:register address="zookeeper://127.0.0.1:2181"/>
 </beans>
 ```
-### 注入服务
+#### 注入服务
 ```
 public class UserAction {
     @Reference
@@ -73,10 +73,10 @@ public class UserAction {
     ...
 }
 ```
-# 配置
-## 服务提供者
-### 支持使用@Service注解和service xml 配置
-#### @Service注解
+## 配置
+### 服务提供者
+#### 支持使用@Service注解和service xml 配置
+##### @Service注解
 指定扫描的包,类需要加@Service注解
 ```
 <?xml version="1.0" encoding="UTF-8"?>
@@ -100,7 +100,7 @@ public class UserAction {
 </beans>
 ```
 
-#### xml service标签配置
+##### xml service标签配置
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -133,9 +133,9 @@ public class UserAction {
 </beans>
 
 ```
-## 服务消费者
-### 支持使用@Reference注解和reference xml标签
-####@Reference注解
+### 服务消费者
+#### 支持使用@Reference注解和reference xml标签
+##### @Reference注解
 ```
 public class UserAction {
     // 注解也支持放在setter方法上
@@ -144,7 +144,7 @@ public class UserAction {
     ...
 }
 ```
-####reference xml标签配置
+##### reference xml标签配置
 暂未实现
 
 感谢宁儿的大力支持和无私奉献

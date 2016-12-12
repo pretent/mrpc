@@ -17,19 +17,19 @@ mrpc 是一个java语言分布式服务框架,旨在快速开发高可用的分�
 * git clone
 
 ```
-git clone https://github.com/pretent/mrpc.git
-cd mrpc
-maven clean install
+$ git clone https://github.com/pretent/mrpc.git
+$ cd mrpc
+$ maven clean install
 ```
 
 * 下载zip
 
 ```
-unzip master.zip
-cd master
-maven clean install
+$ unzip master.zip
+$ cd master
+$ maven clean install
 ```
-Spring 请参考[这里](mrpc-support/mrpc-support-spring/README.md)
+Spring 请参考[Spring Docs](mrpc-support/mrpc-support-spring/README.md)
 ## 添加maven 依赖
 ```
 <dependency>
