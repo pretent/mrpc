@@ -5,13 +5,11 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.log4j.Logger;
+import org.pretent.mrpc.AbstractProvider;
 import org.pretent.mrpc.Handler;
-import org.pretent.mrpc.Provider;
 import org.pretent.mrpc.ServerConfig;
 import org.pretent.mrpc.provider.Service;
 import org.pretent.mrpc.register.Register;
@@ -24,7 +22,7 @@ import org.pretent.mrpc.util.ResourcesFactory;
 /**
  * @author pretent
  */
-public class SocketProvider implements Provider {
+public class SocketProvider extends AbstractProvider {
 
     private static final Logger LOGGER = Logger.getLogger(SocketProvider.class);
 
@@ -56,7 +54,11 @@ public class SocketProvider implements Provider {
 
     public void export(Object object) throws Exception {
         String interfaceName = object.getClass().getInterfaces()[0].getName();
-        ALL_OBJECT.put(interfaceName, object);
+        if(ALL_SERVICE.containsKey(interfaceName)){
+            LOGGER.debug("service " + interfaceName + " already published return.");
+            return ;
+        }
+        ALL_SERVICE.put(interfaceName, object);
         LOGGER.info("-----------------publish starting");
         register.register(new Service(interfaceName, IPHelper.getIp(host), port));
     }
@@ -73,14 +75,14 @@ public class SocketProvider implements Provider {
             Class<?> clazz = iter.next();
             if (!clazz.isInterface() && clazz.getAnnotation(org.pretent.mrpc.annotaion.Service.class) != null) {
                 servicees.add(new Service(clazz.getInterfaces()[0].getName(), IPHelper.getIp(host), port));
-                ALL_OBJECT.put(clazz.getInterfaces()[0].getName(), clazz.newInstance());
+                ALL_SERVICE.put(clazz.getInterfaces()[0].getName(), clazz.newInstance());
             }
         }
         register.register(servicees);
     }
 
     public void start() throws Exception {
-        MapHelper.print(ALL_OBJECT);
+        MapHelper.print(ALL_SERVICE);
         bind(host, port);
     }
 

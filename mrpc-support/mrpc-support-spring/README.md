@@ -1,4 +1,6 @@
-# mrpc-support-spring docs
+mrpc-support-spring docs 
+
+# 快速开始
 
 ## 添加maven 依赖
 ```
@@ -71,7 +73,79 @@ public class UserAction {
     ...
 }
 ```
+# 配置
+## 服务提供者
+### 支持使用@Service注解和service xml 配置
+#### @Service注解
+指定扫描的包,类需要加@Service注解
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mrpc="http://blog.csdn.net/pretent/schema/mrpc"
+       xsi:schemaLocation="
+    http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://blog.csdn.net/pretent/schema/mrpc
+    http://blog.csdn.net/pretent/schema/mrpc.xsd">
 
+    <mrpc:register address="zookeeper://192.168.34.132:2181"/>
+
+    <mrpc:annotation package="org.pretent.server.interfaces.impl"/>
+
+    <context:component-scan base-package="org.pretent.server.interfaces.impl" />
+</beans>
+```
+
+#### xml service标签配置
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mrpc="http://blog.csdn.net/pretent/schema/mrpc"
+       xsi:schemaLocation="
+    http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://blog.csdn.net/pretent/schema/mrpc
+    http://blog.csdn.net/pretent/schema/mrpc.xsd">
+
+    <mrpc:register address="zookeeper://192.168.34.132:2181"/>
+
+    <mrpc:service interface="org.pretent.server.interfaces.UserService" ref="userService"/>
+
+    <mrpc:service interface="org.pretent.server.interfaces.OrderService" ref="orderService"/>
+
+    <!-- 扫描注解spring组件,或者bean标签配置的组件 -->
+    <!--
+    <context:component-scan base-package="org.pretent.server.interfaces.impl" />
+    -->
+
+    <bean id="orderService" class="org.pretent.server.interfaces.impl.OrderServiceImpl"/>
+
+    <bean id="userService" class="org.pretent.server.interfaces.impl.UserServiceImpl"/>
+
+</beans>
+
+```
+## 服务消费者
+### 支持使用@Reference注解和reference xml标签
+####@Reference注解
+```
+public class UserAction {
+    // 注解也支持放在setter方法上
+    @Reference
+    private UserService userService;
+    ...
+}
+```
+####reference xml标签配置
+暂未实现
 
 感谢宁儿的大力支持和无私奉献
 欢迎共同进步
