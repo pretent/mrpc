@@ -4,6 +4,7 @@ mrpc 是一个java语言分布式服务框架,旨在快速开发高可用的分�
 # 开始
 
 Spring 请参考[Spring Docs](mrpc-support/mrpc-support-spring/README.md)
+SpringBoot 请参考[SpringBoot Docs](mrpc-support/spring-boot-starter-mrpc/README.md)
 
 ## 安装
 
