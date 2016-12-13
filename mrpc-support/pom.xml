@@ -10,6 +10,7 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>mrpc-support-spring</module>
-        <module>mrpc-support-spring-boot</module>
-    </modules>
+		<module>mrpc-support-spring-boot</module>
+		<module>spring-boot-starter-mrpc</module>
+	</modules>
 </project>

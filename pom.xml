@@ -5,7 +5,6 @@
 	<artifactId>mrpc</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
-
 	<properties>
 		<zkclient.version>0.9</zkclient.version>
 		<log4j.version>1.2.17</log4j.version>
@@ -33,30 +32,37 @@
 				<artifactId>mina-core</artifactId>
 				<version>${mina.core.version}</version>
 			</dependency>
-			
+
 			<dependency>
-			    <groupId>redis.clients</groupId>
-			    <artifactId>jedis</artifactId>
-			    <version>${jedis.version}</version>
+				<groupId>redis.clients</groupId>
+				<artifactId>jedis</artifactId>
+				<version>${jedis.version}</version>
 			</dependency>
-			
+
 			<dependency>
-			    <groupId>org.springframework</groupId>
-			    <artifactId>spring-beans</artifactId>
-			    <version>${spring.version}</version>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-beans</artifactId>
+				<version>${spring.version}</version>
 				<scope>compile</scope>
 			</dependency>
-						
+
 			<dependency>
-			    <groupId>org.springframework</groupId>
-			    <artifactId>spring-context</artifactId>
-			    <version>${spring.version}</version>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+				<version>${spring.version}</version>
 				<scope>compile</scope>
 			</dependency>
 
 			<dependency>
 				<groupId>org.pretent.open</groupId>
 				<artifactId>mrpc-core</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+				<scope>compile</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.pretent.open</groupId>
+				<artifactId>mrpc-support-spring</artifactId>
 				<version>0.0.1-SNAPSHOT</version>
 				<scope>compile</scope>
 			</dependency>
