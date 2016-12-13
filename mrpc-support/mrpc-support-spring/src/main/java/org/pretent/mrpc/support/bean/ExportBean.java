@@ -20,11 +20,13 @@ public class ExportBean {
                     LOGGER.debug("=================mrpc=================服务启动:");
                     provider.start();
                 } catch (Exception e) {
+                    e.printStackTrace();
                     LOGGER.error(e.getStackTrace());
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
+            LOGGER.error(e.getStackTrace());
         }
     }
 }

@@ -1,6 +1,5 @@
-package org.pretent.mrpc.support.bean;
+package org.pretent.mrpc.support.spring.boot;
 
-import org.apache.log4j.Logger;
 import org.pretent.mrpc.Provider;
 import org.pretent.mrpc.RegisterConfig;
 import org.pretent.mrpc.annotaion.Service;
@@ -8,62 +7,54 @@ import org.pretent.mrpc.client.ProxyFactory;
 import org.pretent.mrpc.provider.mina.MinaProvider;
 import org.pretent.mrpc.register.ProtocolType;
 import org.pretent.mrpc.register.RegisterFactory;
+import org.pretent.mrpc.support.bean.ExportBean;
+import org.pretent.mrpc.support.bean.ImplProxyBean;
+import org.pretent.mrpc.support.bean.InjectBean;
+import org.pretent.mrpc.support.bean.RegisterBean;
 import org.pretent.mrpc.support.config.AnnotationConfig;
 import org.pretent.mrpc.support.config.ProtocolConfig;
 import org.pretent.mrpc.support.config.ReferenceConfig;
 import org.pretent.mrpc.support.config.ServiceConfig;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 
-/**
- */
-public class RegisterBean implements BeanPostProcessor, BeanFactoryPostProcessor {
+import javax.annotation.PostConstruct;
 
-    private static Logger LOGGER = Logger.getLogger(RegisterBean.class);
+public class MrpcBootRegisterBean implements BeanFactoryAware, BeanPostProcessor {
+
+    private ConfigurableListableBeanFactory beanFactory;
 
     private Provider provider;
-
-    private ProtocolConfig protocolConfig;
-
-    private String address;
 
     private InjectBean injectBean = new InjectBean();
 
     private ExportBean exportBean = new ExportBean();
 
+    @Autowired(required = false)
     private AnnotationConfig annotationConfig;
 
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        return bean;
+    @Autowired(required = false)
+    private ProtocolConfig protocolConfig;
+
+    private String address;
+
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        if (beanFactory instanceof ConfigurableListableBeanFactory) {
+            this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
+            // this.configure();
+        }
     }
 
-    /**
-     * import
-     */
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        // annotation @reference
-        if (address != null) {
-            injectBean.setRegisterConfig(new RegisterConfig(address));
-        }
-        injectBean.inject(bean);
-        // xml <reference>
-        return referencce(bean);
-    }
-
-    /**
-     * export service
-     */
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        try {
-            annotationConfig = beanFactory.getBean(AnnotationConfig.class);
-        } catch (BeansException e) {
-            LOGGER.error(e.getMessage());
-        }
+    @PostConstruct
+    public void configure() {
         String[] names = beanFactory.getBeanDefinitionNames();
         for (String name : names) {
+            // System.out.println("55555555555555555555555555555555:->"+name);
             if (!RegisterBean.class.getName().equals(name) && !ReferenceConfig.class.getName().equals(name)
                     && !AnnotationConfig.class.getName().equals(name) && !ProtocolConfig.class.getName().equals(name)
                     && !ServiceConfig.class.getName().equals(name)) {
@@ -83,12 +74,14 @@ public class RegisterBean implements BeanPostProcessor, BeanFactoryPostProcessor
                         String className = interfaceBean.getBeanClassName();
                         Class clazz = null;
                         try {
-                            clazz = Class.forName(className);
+                            if (className != null) {
+                                clazz = Class.forName(className);
+                            }
                         } catch (ClassNotFoundException e) {
                             e.printStackTrace();
                         }
-                        if (className.startsWith(packageName) && clazz != null
-                                && clazz.getAnnotation(Service.class) != null) {
+                        if (className != null && packageName != null && className.startsWith(packageName)
+                                && clazz != null && clazz.getAnnotation(Service.class) != null) {
                             try {
                                 export(clazz.newInstance());
                             } catch (InstantiationException e) {
@@ -102,6 +95,43 @@ public class RegisterBean implements BeanPostProcessor, BeanFactoryPostProcessor
                 }
             }
         }
+    }
+
+    private void export(Object bean) {
+        try {
+            if (provider == null) {
+                provider = new MinaProvider();
+                if (protocolConfig != null) {
+                    provider.setHost(protocolConfig.getHost());
+                    provider.setPort(protocolConfig.getPort());
+                }
+                if (address != null) {
+                    provider.setRegister(new RegisterFactory().getRegister(address,
+                            ProtocolType.valueOf(address.substring(0, address.indexOf("/") - 1).toUpperCase())));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        exportBean.export(provider, bean);
+    }
+
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+        this.configure();
+    }
+
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        // annotation @reference
+        if (address != null) {
+            injectBean.setRegisterConfig(new RegisterConfig(address));
+        }
+        injectBean.inject(bean);
+        // xml <reference>
+        return referencce(bean);
+    }
+
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        return bean;
     }
 
     private Object referencce(Object bean) {
@@ -123,38 +153,6 @@ public class RegisterBean implements BeanPostProcessor, BeanFactoryPostProcessor
         return bean;
     }
 
-    private void export(Object bean) {
-        try {
-            if (provider == null) {
-                provider = new MinaProvider();
-                if (protocolConfig != null) {
-                    provider.setHost(protocolConfig.getHost());
-                    provider.setPort(protocolConfig.getPort());
-                }
-                provider.setRegister(new RegisterFactory().getRegister(address,
-                        ProtocolType.valueOf(address.substring(0, address.indexOf("/") - 1).toUpperCase())));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        exportBean.export(provider, bean);
-    }
-
-    public Provider getProvider() {
-        return provider;
-    }
-
-    public void setProvider(Provider provider) {
-        this.provider = provider;
-    }
-
-    public ProtocolConfig getProtocolConfig() {
-        return protocolConfig;
-    }
-
-    public void setProtocolConfig(ProtocolConfig protocolConfig) {
-        this.protocolConfig = protocolConfig;
-    }
 
     public String getAddress() {
         return address;

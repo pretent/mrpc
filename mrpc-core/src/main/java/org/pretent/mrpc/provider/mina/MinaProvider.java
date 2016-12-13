@@ -42,7 +42,6 @@ public class MinaProvider extends AbstractProvider {
 
     public MinaProvider() throws Exception {
         acceptor = new NioSocketAcceptor();
-        register = new RegisterFactory().getRegister();
         acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, 10000);
         setHost(ResourcesFactory.getString(ServerConfig.KEY_STRING_HOST) == null ? "0.0.0.0"
                 : ResourcesFactory.getString(ServerConfig.KEY_STRING_HOST));
@@ -52,6 +51,9 @@ public class MinaProvider extends AbstractProvider {
 
     public void export(Object object) throws Exception {
         LOGGER.info("-----------------publish starting");
+        if(register == null){
+            register = new RegisterFactory().getRegister();
+        }
         String interfaceName = object.getClass().getInterfaces()[0].getName();
         if (ALL_SERVICE.containsKey(interfaceName)) {
             LOGGER.debug("service " + interfaceName + " already published return.");
@@ -68,6 +70,9 @@ public class MinaProvider extends AbstractProvider {
         LOGGER.info("-----------------publish starting");
         if (packageName == null) {
             throw new NullPointerException("packageName is null");
+        }
+        if(register == null){
+            register = new RegisterFactory().getRegister();
         }
         Set<Class<?>> classes = ClassUtils.getClasses(packageName);
         Iterator<Class<?>> iter = classes.iterator();
