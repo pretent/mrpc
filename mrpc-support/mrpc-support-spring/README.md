@@ -29,9 +29,10 @@ $ maven clean install
 	<artifactId>mrpc-core</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 </dependency>
+
 <dependency>
 	<groupId>org.pretent.open</groupId>
-	<artifactId>mrpc-core-support</artifactId>
+	<artifactId>mrpc-support-spring</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 </dependency>
 ```
