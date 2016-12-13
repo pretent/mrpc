@@ -1,10 +1,10 @@
 package org.pretent.mrpc.support.parer;
 
-import org.apache.log4j.Logger;
-import org.pretent.mrpc.support.bean.ReferenceBean;
+import org.pretent.mrpc.support.bean.ImplProxyBean;
 import org.pretent.mrpc.support.bean.RegisterBean;
 import org.pretent.mrpc.support.config.AnnotationConfig;
 import org.pretent.mrpc.support.config.ProtocolConfig;
+import org.pretent.mrpc.support.config.ReferenceConfig;
 import org.pretent.mrpc.support.config.ServiceConfig;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -18,8 +18,6 @@ import org.w3c.dom.Element;
  * @author pretent
  */
 public class MrpcBeanDefinitionParser implements BeanDefinitionParser {
-
-	private static Logger LOGGER = Logger.getLogger(MrpcBeanDefinitionParser.class);
 
 	private Class<?> clazz;
 
@@ -49,7 +47,6 @@ public class MrpcBeanDefinitionParser implements BeanDefinitionParser {
 			beanDefinition.getPropertyValues().add("address", address);
 		}
 		if (ServiceConfig.class.equals(clazz)) {
-			// 是否已经注册了ServiceConfig
 			String className = element.getAttribute("interface");
 			String ref = element.getAttribute("ref");
 			if (!parserContext.getRegistry().containsBeanDefinition(ServiceConfig.class.getName())) {
@@ -59,7 +56,6 @@ public class MrpcBeanDefinitionParser implements BeanDefinitionParser {
 				parserContext.getRegistry().registerBeanDefinition(ServiceConfig.class.getName(),
 						serviceBeanDefinition);
 			}
-			// 每一个service标签就是一个需要到处的bean定义
 			try {
 				Class definationClazz = Class.forName(className);
 				beanDefinition.setBeanClass(definationClazz);
@@ -69,28 +65,29 @@ public class MrpcBeanDefinitionParser implements BeanDefinitionParser {
 				throw new IllegalArgumentException(e.getMessage());
 			}
 		}
-		if (ReferenceBean.class.equals(clazz)) {
+		if (ReferenceConfig.class.equals(clazz)) {
 			String referenceId = element.getAttribute("id");
 			String className = element.getAttribute("interface");
 			if (referenceId == null) {
 				throw new IllegalArgumentException("reference tag  attrubute reference must config");
 			}
-			// 是否已经注册了ReferenceBean
-			if (!parserContext.getRegistry().containsBeanDefinition(ReferenceBean.class.getName())) {
+			if (!parserContext.getRegistry().containsBeanDefinition(ReferenceConfig.class.getName())) {
 				RootBeanDefinition referenceBeanDefinition = new RootBeanDefinition();
-				referenceBeanDefinition.setBeanClass(ReferenceBean.class);
+				referenceBeanDefinition.setBeanClass(ReferenceConfig.class);
 				referenceBeanDefinition.setLazyInit(false);
-				referenceBeanDefinition.getPropertyValues().add("id", referenceId);
-				referenceBeanDefinition.getPropertyValues().add("interfaceName", className);
-				parserContext.getRegistry().registerBeanDefinition(ReferenceBean.class.getName(),
+				parserContext.getRegistry().registerBeanDefinition(ReferenceConfig.class.getName(),
 						referenceBeanDefinition);
 			}
-			// 每一个service标签就是一个需要到处的bean定义
 			try {
 				Class referenceClass = Class.forName(className);
-				beanDefinition.setBeanClass(referenceClass);
-				beanDefinition.setAttribute("interfaceName", referenceClass.getName());
-				id = "mrpc.reference:" + referenceClass.getName();
+				beanDefinition.setBeanClass(ImplProxyBean.class);
+				beanDefinition.getPropertyValues().add("id", referenceId);
+				beanDefinition.getPropertyValues().add("interfaceName", referenceClass.getName());
+				// id = "mrpc.reference:" + referenceClass.getName();
+				id = referenceId;
+				if (id == null) {
+					throw new IllegalArgumentException("attribute id must be set of reference tag");
+				}
 			} catch (ClassNotFoundException e) {
 				throw new IllegalArgumentException(e.getMessage());
 			}

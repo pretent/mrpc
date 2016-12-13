@@ -18,7 +18,7 @@ public class InjectBean {
         for (Method method : methods) {
             Reference reference = method.getAnnotation(Reference.class);
             if (reference != null) {
-                LOGGER.debug("method================" + bean.getClass().getName() + "--->" + method.getName() + "genrate reference proxy");
+                LOGGER.debug("method================" + bean.getClass().getName() + "--->" + method.getName() + " genrate reference proxy");
                 try {
                     Object value = ProxyFactory.getService(method.getParameterTypes()[0]);
                     if (value != null) {
@@ -39,7 +39,7 @@ public class InjectBean {
                         Object value = field.get(bean);
                         field.setAccessible(false);
                         if (value == null) {
-                            LOGGER.debug("field================" + bean.getClass().getName() + "--->" + field.getName() + "genrate reference proxy");
+                            LOGGER.debug("field================" + bean.getClass().getName() + "--->" + field.getName() + " genrate reference proxy");
                             value = ProxyFactory.getService(field.getType());
                             if (value != null) {
                                 field.setAccessible(true);

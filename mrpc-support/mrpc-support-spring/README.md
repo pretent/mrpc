@@ -145,7 +145,26 @@ public class UserAction {
 }
 ```
 ##### reference xml标签配置
-暂未实现
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mrpc="http://blog.csdn.net/pretent/schema/mrpc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+	http://blog.csdn.net/pretent/schema/mrpc 
+	http://blog.csdn.net/pretent/schema/mrpc.xsd">
+
+	<mrpc:register address="zookeeper://127.0.0.1:2181"/>
+	
+	<mrpc:reference id="userService" interface="server.UserService"/>
+	
+	<!-- 为UserAction注入服务 -->
+	<bean id="userAction" class="client.UserAction" >
+		<property name="userService" ref="userService" />
+	</bean>
+</beans>  
+```
+
 
 感谢宁儿的大力支持和无私奉献
 欢迎共同进步
