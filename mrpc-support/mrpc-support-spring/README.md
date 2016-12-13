@@ -2,6 +2,26 @@ mrpc-support-spring docs
 
 ## 快速开始
 
+### 安装
+
+使用git下载或者下载zip编译安装
+
+* git clone
+
+```
+$ git clone https://github.com/pretent/mrpc.git
+$ cd mrpc
+$ maven clean install
+```
+
+* 下载zip
+
+```
+$ unzip master.zip
+$ cd master
+$ maven clean install
+```
+
 ### 添加maven 依赖
 ```
 <dependency>
