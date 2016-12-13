@@ -4,7 +4,6 @@ import org.pretent.mrpc.support.config.AnnotationConfig;
 import org.pretent.mrpc.support.config.ProtocolConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -12,13 +11,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@AutoConfigureOrder(value = 1)
-@ConditionalOnProperty(value = {"mrpc.register"})
 @PropertySource("application.properties")
-@EnableConfigurationProperties(value = {org.pretent.mrpc.support.spring.boot.config.AnnotationConfig.class,org.pretent.mrpc.support.spring.boot.config.ProtocolConfig.class})
+@EnableConfigurationProperties(value = {org.pretent.mrpc.support.spring.boot.config.AnnotationConfig.class, org.pretent.mrpc.support.spring.boot.config.ProtocolConfig.class})
 public class MrpcAutoConfiguration {
 
-    @Value("${mrpc.register}")
+    @Value("${mrpc.register:zookeeper://127.0.0.1:2181}")
     private String address;
 
     @Autowired(required = false)
@@ -42,14 +39,13 @@ public class MrpcAutoConfiguration {
     @Bean
     @ConditionalOnProperty("mrpc.host")
     public ProtocolConfig mProtocolConfig() {
-        ProtocolConfig protocolConfig =new ProtocolConfig();
+        ProtocolConfig protocolConfig = new ProtocolConfig();
         protocolConfig.setHost(pconfig.getHost());
         protocolConfig.setPort(pconfig.getPort());
         return protocolConfig;
     }
 
     @Bean
-    @ConditionalOnProperty("mrpc.register")
     public MrpcBootRegisterBean mMrpcBeanFactory() {
         MrpcBootRegisterBean mrpcBeanFactory = new MrpcBootRegisterBean();
         System.err.println(address);
