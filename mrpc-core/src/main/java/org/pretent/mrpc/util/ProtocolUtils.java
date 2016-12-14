@@ -17,4 +17,8 @@ public class ProtocolUtils {
 		}
 		return protocol;
 	}
+	
+	public static ProtocolType getProtocol(String address) {
+		return ProtocolType.valueOf(address.substring(0, address.indexOf(":")).toUpperCase());
+	}
 }

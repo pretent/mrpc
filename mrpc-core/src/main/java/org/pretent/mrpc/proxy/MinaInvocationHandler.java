@@ -113,7 +113,12 @@ public class MinaInvocationHandler<T> implements InvocationHandler {
         if (serviceFactory != null) {
             return serviceFactory;
         }
-        ProtocolType protocol = ProtocolUtils.getProtocol();
+        ProtocolType protocol = null;
+        if(registerConfig != null && registerConfig.getAddress() != null){
+        	protocol = ProtocolUtils.getProtocol(registerConfig.getAddress());
+        }else{
+        	protocol = ProtocolUtils.getProtocol();
+        }
         LOGGER.info("protocol : " + protocol.name());
         switch (protocol) {
             case ZOOKEEPER: {
