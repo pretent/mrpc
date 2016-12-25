@@ -16,7 +16,7 @@ SpringBoot 请参考[SpringBoot Docs](mrpc-support/spring-boot-starter-mrpc/READ
 ```
 $ git clone https://github.com/pretent/mrpc.git
 $ cd mrpc
-$ maven clean install
+$ mvn clean install
 ```
 
 * 下载zip
@@ -24,7 +24,7 @@ $ maven clean install
 ```
 $ unzip master.zip
 $ cd master
-$ maven clean install
+$ mvn clean install
 ```
 
 ## 添加maven 依赖
