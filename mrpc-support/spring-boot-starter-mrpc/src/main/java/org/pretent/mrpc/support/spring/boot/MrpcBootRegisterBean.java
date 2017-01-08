@@ -46,7 +46,6 @@ public class MrpcBootRegisterBean implements BeanFactoryAware, BeanPostProcessor
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
         if (beanFactory instanceof ConfigurableListableBeanFactory) {
             this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
-            // this.configure();
         }
     }
 
@@ -54,7 +53,6 @@ public class MrpcBootRegisterBean implements BeanFactoryAware, BeanPostProcessor
     public void configure() {
         String[] names = beanFactory.getBeanDefinitionNames();
         for (String name : names) {
-            // System.out.println("55555555555555555555555555555555:->"+name);
             if (!RegisterBean.class.getName().equals(name) && !ReferenceConfig.class.getName().equals(name)
                     && !AnnotationConfig.class.getName().equals(name) && !ProtocolConfig.class.getName().equals(name)
                     && !ServiceConfig.class.getName().equals(name)) {

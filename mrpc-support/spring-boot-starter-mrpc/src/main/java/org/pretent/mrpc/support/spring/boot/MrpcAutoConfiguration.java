@@ -10,6 +10,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
+/**
+ * 支持spring boot的自动配置
+ */
 @Configuration
 @PropertySource("application.properties")
 @EnableConfigurationProperties(value = {org.pretent.mrpc.support.spring.boot.config.AnnotationConfig.class, org.pretent.mrpc.support.spring.boot.config.ProtocolConfig.class})
