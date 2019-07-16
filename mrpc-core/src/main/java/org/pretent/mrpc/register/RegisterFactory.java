@@ -25,7 +25,7 @@ public class RegisterFactory {
                 return new RedisRegister();
             }
             case MULTICAST: {
-                throw new Exception("not implementats");
+                throw new Exception("not implements");
             }
             default: {
                 return new ZkRegister();
