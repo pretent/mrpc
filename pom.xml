@@ -8,7 +8,7 @@
 	<properties>
 		<zkclient.version>0.9</zkclient.version>
 		<log4j.version>1.2.17</log4j.version>
-		<mina.core.version>2.0.7</mina.core.version>
+		<mina.core.version>2.0.22</mina.core.version>
 		<jedis.version>2.9.0</jedis.version>
 		<spring.version>4.3.4.RELEASE</spring.version>
 	</properties>
